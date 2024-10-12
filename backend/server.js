@@ -1,11 +1,21 @@
 const express = require('express');
-const app = express();
-const port = 3000;
+const { MongoClient } = require('mongodb');
 
-app.get('/hello', (req, res) => {
-    res.send('Hello from the Backend!');
+const app = express();
+const PORT = 3000;
+
+const uri = 'mongodb://root:example@mongo:27017'; // Use the service name 'mongo'
+const client = new MongoClient(uri);
+
+app.get('/hello', async (req, res) => {
+    await client.connect();
+    const database = client.db('test');
+    const collection = database.collection('messages');
+    const message = await collection.findOne({}); // Retrieve a document
+
+    res.send(message ? message.text : 'Hello from the Backend!');
 });
 
-app.listen(port, () => {
-    console.log(`Backend running at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Backend running on port ${PORT}`);
 });
